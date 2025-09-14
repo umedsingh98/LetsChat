@@ -20,6 +20,8 @@ const LoginPage = () => {
       setIsDataSubmitted(true)
       return;
     }
+
+    console.log("Logged in successfully");
   }
 
   return (
