@@ -30,14 +30,14 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (state, credentials) => {
     try {
-      const data = await axios.post(`/api/auth/${state}`, credentials);
+      const { data } = await axios.post(`/api/auth/${state}`, credentials);
       if (data.success) {
         setAuthUser(data.userData);
         connectSocket(data.userData);
         axios.defaults.headers.common["token"] = data.token;
         setToken(data.token);
         localStorage.setItem("token", data.token);
-        toast.success(data.message);
+        toast.success(data.message + "Logged in successfully");
       } else {
         toast.error(data.message);
       }
@@ -61,12 +61,21 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (body) => {
     try {
       const { data } = await axios.put("/api/auth/update-profile", body);
+
+      console.log(data , " profile update response");
       if (data.success) {
         setAuthUser(data.user);
         toast.success("Profile Updated Successfully.");
+        return data; // Return the response for better error handling
+      } else {
+        toast.error(data.message || "Profile update failed");
+        throw new Error(data.message || "Profile update failed");
       }
     } catch (error) {
-      toast.error(error.message);
+      console.error("Profile update error:", error);
+      const errorMessage = error.response?.data?.message || error.message || "Profile update failed";
+      toast.error(errorMessage);
+      throw error; // Re-throw to allow calling code to handle
     }
   };
 
@@ -82,7 +91,7 @@ export const AuthProvider = ({ children }) => {
     newSocket.connect();
     setSocket(newSocket);
 
-    newSocket.on("getOnlineUser", (userIds) => {
+    newSocket.on("getOnlineUsers", (userIds) => {
       setOnlineUsers(userIds);
     });
   };

@@ -1,6 +1,7 @@
 import cloudinary from "../lib/cloudinary.js";
 import { generateToken } from "../lib/utils.js";
 import User from "../models/User.js";
+import bcrypt from "bcryptjs"
 
 //------------------------------ Signup a new user ------------------------------
 export const signup = async (req, res) => {
@@ -38,7 +39,7 @@ export const signup = async (req, res) => {
     });
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ success: false, message: error.message });
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -64,9 +65,11 @@ export const login = async (req, res) => {
       token,
       message: "Logged in successfully.",
     });
+
+    console.log("Logged in successfully")
   } catch (error) {
-    console.log(error.message);
-    res.status(500).json({ success: false, message: error.message });
+    console.log(error.message + "Login failed");
+    res.json({ success: false, message: error.message });
   }
 };
 
@@ -80,6 +83,15 @@ export const updateProfile = async (req, res) => {
   try {
     const { profilePic, bio, fullname } = req.body;
     const userId = req.user._id;
+    
+    // Validate required fields
+    if (!fullname || !bio) {
+      return res.status(400).json({
+        success: false, 
+        message: "Fullname and bio are required"
+      });
+    }
+
     let updatedUser;
 
     if (!profilePic) {
@@ -93,14 +105,21 @@ export const updateProfile = async (req, res) => {
 
       updatedUser = await User.findByIdAndUpdate(
         userId,
-        { profilepic: upload.secure_url, bio, fullname },
+        { profilePic: upload.secure_url, bio, fullname },
         { new: true }
       );
     }
 
-    res.status().json({success: true, user: updatedUser})
+    if (!updatedUser) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found"
+      });
+    }
+
+    res.status(200).json({success: true, user: updatedUser})
   } catch (error) {
-    console.log(error.message);
-    res.json({success: false, message: error.message});
+    console.log("Profile update error:", error.message);
+    res.status(500).json({success: false, message: error.message});
   }
 };

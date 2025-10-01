@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import assets from "../assets/assets";
+import { AuthContext } from '../../context/AuthContext.jsx';
 
 const LoginPage = () => {
   const [currState, setCurrState] = useState("Sign Up");
@@ -13,16 +14,23 @@ const LoginPage = () => {
 
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
+  const { login } = useContext(AuthContext);
+
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if(currState === "Sign Up" && !isDataSubmitted){
-      setIsDataSubmitted(true)
+    if (currState === "Sign Up" && !isDataSubmitted) {
+      setIsDataSubmitted(true);
       return;
     }
 
-    console.log("Logged in successfully");
-  }
+    login(currState === "Sign Up" ? "signup" : "login", {
+      fullname: formData.fullname,
+      email: formData.email,
+      password: formData.password,
+      bio: formData.bio,
+    });
+  };
 
   return (
     <div className="min-h-screen w-full bg-cover bg-center flex items-center justify-center gap-8 sm:justify-evenly max-sm:flex-col backdrop-blur-2xl">
@@ -47,7 +55,9 @@ const LoginPage = () => {
         </h1>
         {currState === "Sign Up" && !isDataSubmitted && (
           <input
-            onChange={(e) => setFormData({...formData, fullname: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, fullname: e.target.value })
+            }
             value={formData.fullname}
             type="text"
             className="py-2 px-4 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -59,7 +69,9 @@ const LoginPage = () => {
         {!isDataSubmitted && (
           <>
             <input
-              onChange={(e) => setFormData({...formData, email: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               value={formData.email}
               type="email"
               placeholder="Email Address"
@@ -68,7 +80,9 @@ const LoginPage = () => {
             />
 
             <input
-              onChange={(e) => setFormData({...formData, password: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
               value={formData.password}
               type="password"
               placeholder="Password"
@@ -82,7 +96,7 @@ const LoginPage = () => {
           <textarea
             rows={3}
             placeholder="Write your bio..."
-            onChange={(e) => setFormData({...formData, bio: e.target.value })}
+            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
             value={formData.bio}
             className="py-2 px-4 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required

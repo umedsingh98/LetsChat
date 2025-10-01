@@ -13,9 +13,9 @@ export const getUsersForSidebar = async (req,res) => {
     //count no. of messages not seen yet
     const unseenMessages = {};
     const promises = filteredUSers.map(async (user) => {
-        const messages = await Message.find({senderId: user._id, recieverId: userId, seen: false})
-        if(messages.length > 0){
-            unseenMessages(user._id) = messages.length;
+        const messages = await Message.find({ senderId: user._id, recieverId: userId, seen: false });
+        if (messages.length > 0) {
+            unseenMessages[user._id] = messages.length; // fix: correct object key assignment
         }
     })
  await Promise.all(promises);
@@ -84,7 +84,8 @@ export const sendMessage = async (req, res) => {
 
     const newMessage = await Message.create({
         senderId,
-        recieverId,text,
+        recieverId,
+        text,
         image: imageUrl
     })
 
